@@ -1,0 +1,10 @@
+{
+  "name": "causvia-glass-browser-check",
+  "private": true,
+  "type": "module",
+  "description": "Cross-browser checks run by .github/workflows/browser-check.yml (not part of the site build).",
+  "dependencies": {
+    "playwright": "1.64.1",
+    "selenium-webdriver": "4.51.0"
+  }
+}

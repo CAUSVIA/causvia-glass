@@ -1,0 +1,71 @@
+name: Browser check
+
+# Run from the Actions tab, or: gh workflow run browser-check.yml -f url=https://causvia-glass.vercel.app
+# Opens the site in Firefox, desktop Safari and Mobile Safari (iOS Simulator) and saves
+# screenshots plus a report as artifacts.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site to check
+        default: https://causvia-glass.vercel.app
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  firefox:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tests/browser-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps firefox
+      - run: node playwright-check.mjs "${{ inputs.url }}" firefox
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: firefox
+          path: tests/browser-check/out
+
+  safari:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: tests/browser-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: sudo safaridriver --enable
+      - run: node safari-check.mjs "${{ inputs.url }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: safari
+          path: tests/browser-check/out
+
+  ios-safari:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: tests/browser-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bash ios-check.sh "${{ inputs.url }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-safari
+          path: tests/browser-check/out

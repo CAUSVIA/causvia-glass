@@ -6,3 +6,6 @@ dist
 .claude
 .env
 .env.local
+tests/browser-check/node_modules
+tests/browser-check/out
+tests/browser-check/package-lock.json

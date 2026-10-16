@@ -13,6 +13,17 @@ import { initReveal } from './js/reveal.js';
 import { initCursorLight } from './js/cursor-light.js';
 import { initFooter } from './js/footer.js';
 
+// ?debug: keep script warnings/errors where automated browser checks (Safari via WebDriver) can read them
+if (debug) {
+  const log = (window.__log = []);
+  for (const level of ['warn', 'error']) {
+    const original = console[level].bind(console);
+    console[level] = (...args) => { log.push(`${level}: ${args.map(String).join(' ')}`); original(...args); };
+  }
+  addEventListener('error', (e) => log.push(`error: ${e.message}`));
+  addEventListener('unhandledrejection', (e) => log.push(`rejection: ${e.reason}`));
+}
+
 const html = document.documentElement;
 html.classList.add('js');
 html.classList.toggle('motion', !env.reduceMotion);
