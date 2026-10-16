@@ -19,25 +19,25 @@ export const debug = params.has('debug');
 // page only ever holds one WebGL context.
 export const GL_ATTRIBUTES = { alpha: true, premultipliedAlpha: false, antialias: false, preserveDrawingBuffer: true };
 
-function createSharedGL() {
-  if (forceFallback) return null;
+let sharedGL;
+/** Created lazily (it costs ~100ms), after the page has loaded. null when WebGL can't run well. */
+export function getSharedGL() {
+  if (sharedGL !== undefined) return sharedGL;
+  sharedGL = null;
+  if (forceFallback) return sharedGL;
   try {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl', { ...GL_ATTRIBUTES, failIfMajorPerformanceCaveat: !forceGlass });
-    return gl ? { canvas, gl } : null;
-  } catch {
-    return null;
-  }
+    if (gl) sharedGL = { canvas, gl };
+  } catch { /* stays null: CSS glass */ }
+  return sharedGL;
 }
 
-export const shared = createSharedGL();
-
 export const env = {
-  webgl: !!shared,
   get reduceMotion() { return mq.reduceMotion.matches; },
   get reduceTransparency() { return mq.reduceTransparency.matches; },
   get mobile() { return mq.mobile.matches; },
   get finePointer() { return mq.finePointer.matches; },
-  /** true when the liquid glass library may run at all */
-  get glass() { return this.webgl && !this.reduceMotion && !this.reduceTransparency; },
+  /** true when the user's preferences allow the WebGL glass (WebGL itself is checked at boot) */
+  get glass() { return !forceFallback && !this.reduceMotion && !this.reduceTransparency; },
 };

@@ -66,9 +66,9 @@ export function initHero() {
     hint.classList.remove('is-shown');
   });
 
+  // its first callback (right after the first layout) places the lens
   const ro = new ResizeObserver(() => { if (!dragged) place(); });
   ro.observe(title);
-  place();
 
   return {
     root,

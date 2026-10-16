@@ -54,10 +54,35 @@ async function initOnShared(LiquidGlass, options, shared) {
   try {
     const inst = await pending;
     inst.renderer.canvas = shared.canvas;
+    shareShaderPrograms(inst.renderer, shared.gl);
     return inst;
   } finally {
     stub?.remove();
   }
+}
+
+/**
+ * Every renderer compiles the same three shader programs (~60-90ms on Windows/ANGLE).
+ * On the shared context they only need compiling once: later renderers adopt the
+ * programs of the first, and destroy() is kept from deleting them.
+ */
+const PROGRAM_FIELDS = ['blitP', 'blitU', 'blurP', 'blurU', 'glassP', 'glassU'];
+let programs = null;
+function shareShaderPrograms(renderer, gl) {
+  if (!programs) programs = Object.fromEntries(PROGRAM_FIELDS.map((k) => [k, renderer[k]]));
+  const proto = Object.getPrototypeOf(renderer);
+  if (proto.__sharedPrograms) return;
+  proto.__sharedPrograms = true;
+  const compile = proto._initPrograms;
+  proto._initPrograms = function initPrograms() {
+    if (programs && this.gl === gl && !gl.isContextLost()) Object.assign(this, programs);
+    else compile.call(this);
+  };
+  const deleteProgram = gl.deleteProgram.bind(gl);
+  gl.deleteProgram = (p) => {
+    if (programs && (p === programs.blitP || p === programs.blurP || p === programs.glassP)) return;
+    deleteProgram(p);
+  };
 }
 
 function readConfig(el) {
@@ -86,21 +111,10 @@ export function setConfig(el, patch) {
 const glassChildren = (root) => [...root.children].filter((c) => c.classList.contains('glass'));
 
 export class GlassManager {
-  constructor({ mobile, shared }) {
+  constructor({ mobile }) {
     this.mobile = mobile;
-    this.shared = shared;
+    this.shared = null;
     this.contextLost = false;
-    // If the GPU drops the shared context, fall back to the CSS glass until it returns.
-    shared.canvas.addEventListener('webglcontextlost', (e) => {
-      e.preventDefault();
-      this.contextLost = true;
-      for (const s of this.roots.values()) if (s.inst) s.inst.renderer.contextLost = true;
-      this.setEnabled(false);
-    });
-    shared.canvas.addEventListener('webglcontextrestored', () => {
-      this.contextLost = false;
-      this.setEnabled(true);
-    });
     this.roots = new Map();
     this.near = new Set();
     this.far = new Set();
@@ -125,7 +139,21 @@ export class GlassManager {
     this.roots.set(el, { el, name: el.dataset.lgRoot, inst: null, starting: false, failed: false, ...opts });
   }
 
-  start() {
+  /** Hand over the page's single WebGL context, then start watching the roots. */
+  start(shared) {
+    this.shared = shared;
+    // If the GPU drops the shared context, fall back to the CSS glass until it returns.
+    shared.canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.contextLost = true;
+      programs = null;
+      for (const s of this.roots.values()) if (s.inst) s.inst.renderer.contextLost = true;
+      this.setEnabled(false);
+    });
+    shared.canvas.addEventListener('webglcontextrestored', () => {
+      this.contextLost = false;
+      this.setEnabled(true);
+    });
     this._observe();
     this.schedule();
   }
@@ -150,6 +178,7 @@ export class GlassManager {
   setMobile(mobile) {
     if (mobile === this.mobile) return;
     this.mobile = mobile;
+    if (!this.shared) return;
     for (const s of this.roots.values()) this._stop(s);
     this._observe();
     this.schedule();
@@ -162,7 +191,7 @@ export class GlassManager {
   }
 
   schedule() {
-    if (this._raf) return;
+    if (this._raf || !this.shared) return;
     this._raf = requestAnimationFrame(() => {
       this._raf = 0;
       this.reconcile();

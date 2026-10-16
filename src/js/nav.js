@@ -80,7 +80,7 @@ export function initNav({ manager, fields }) {
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', queueMirror);
   new ResizeObserver(queueMirror).observe(root);
-  onScroll();
+  requestAnimationFrame(onScroll);
 
   return { paintMirror: queueMirror, root };
 }

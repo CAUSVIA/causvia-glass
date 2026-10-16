@@ -57,5 +57,4 @@ export function initLoop({ fields }) {
   };
   new ResizeObserver(queue).observe(root);
   wide.addEventListener('change', queue);
-  layout();
 }

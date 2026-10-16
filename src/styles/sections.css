@@ -626,7 +626,7 @@ html:not(.motion) .bar-human { width: calc((100 - var(--ai)) * 1% - 2px); }
   text-align: center;
 }
 .cta-card h2 { font-size: clamp(44px, 6.4vw, 92px); line-height: 1.02; letter-spacing: -0.038em; }
-.cta-card p { margin: 26px auto 0; max-width: 520px; font-size: 19px; color: var(--muted-2); }
+.cta-card p { margin: 26px auto 0; max-width: 520px; font-size: 19px; color: #C9CCD8; }
 .cta-btn { align-self: end; margin-bottom: 72px; }
 
 /* ================= 12. FOOTER ================= */

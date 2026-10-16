@@ -162,7 +162,7 @@ const PRESETS = {
     static(ctx, w, h, geo) {
       grid(ctx, w, h, { step: 80, alpha: 0.035 });
       radialMask(ctx, w, h, 0.5, 0.55, 0.55);
-      if (!geo) return;
+      if (!geo?.points) return; // loop.js hasn't laid the pills out yet
       const { points, owners } = geo;
       if (geo.mode === 'orbit') {
         const { cx, cy, rx, ry } = geo;
@@ -514,10 +514,14 @@ export class Fields {
     this.raf = 0;
     this.last = 0;
     this.onFrame = null;
+    this.visibleGlass = new Set();
+    this.turn = 0;
   }
 
   get interval() { return 1000 / (this.mobile ? 14 : 20); }
-  get scale() { return Math.min(devicePixelRatio || 1, this.mobile ? 1 : 1.5); }
+  get scale() { return Math.min(devicePixelRatio || 1, this.mobile ? 1 : 1.25); }
+  /** glass panels re-rendered per animation tick; the rest catch up on later ticks */
+  get glassBudget() { return this.mobile ? 1 : 3; }
 
   add(canvas) {
     const name = canvas.dataset.field;
@@ -582,6 +586,13 @@ export class Fields {
       this.visibleIO.observe(f.canvas);
       this.resizeRO.observe(f.canvas);
     }
+    // which glass panels are on screen (only those need to follow the drifting light)
+    this.glassIO = new IntersectionObserver((entries) => {
+      for (const e of entries) e.isIntersecting ? this.visibleGlass.add(e.target) : this.visibleGlass.delete(e.target);
+    });
+    for (const f of this.fields) {
+      for (const g of f.root.children) if (g.classList.contains('glass')) this.glassIO.observe(g);
+    }
     document.addEventListener('visibilitychange', () => this.kick());
   }
 
@@ -615,6 +626,7 @@ export class Fields {
     const h = f.canvas.clientHeight;
     if (!w || !h) return;
     const s = this.scale;
+    if (f.layer && f.w === w && f.h === h && f.s === s) return; // nothing changed
     f.w = w; f.h = h; f.s = s;
     const pw = Math.round(w * s);
     const ph = Math.round(h * s);
@@ -664,6 +676,22 @@ export class Fields {
     edgeFade(ctx, w, h, preset.fadeTop ?? 150, preset.fadeBottom ?? 150);
   }
 
+  /** Ask a few on-screen glass panels to re-render over the new backdrop, in rotation. */
+  refreshGlass() {
+    const live = [];
+    for (const g of this.visibleGlass) {
+      const f = this.byRoot(g.parentElement);
+      if (f?.inst && f.visible) live.push([g, f.inst]);
+    }
+    if (!live.length) return;
+    const n = Math.min(this.glassBudget, live.length);
+    for (let i = 0; i < n; i++) {
+      const [g, inst] = live[(this.turn + i) % live.length];
+      inst.markChanged(g);
+    }
+    this.turn = (this.turn + n) % live.length;
+  }
+
   kick() {
     const want = !this.still && document.visibilityState === 'visible' && this.fields.some((f) => f.active && f.visible);
     if (want && !this.raf) this.raf = requestAnimationFrame(this.loop);
@@ -681,9 +709,11 @@ export class Fields {
         if (!f.active || !f.visible) continue;
         any = true;
         this.paint(f, t);
-        f.inst?.markChanged(f.canvas);
       }
-      if (any) this.onFrame?.();
+      if (any) {
+        this.refreshGlass();
+        this.onFrame?.();
+      }
     }
     this.kick();
   }
