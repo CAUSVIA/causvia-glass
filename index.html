@@ -339,25 +339,63 @@
 </main>
 
 <!-- ============ 12. FOOTER ============ -->
-<footer class="sec footer" aria-label="Footer">
+<footer class="sec footer">
   <div class="lg-root footer-root" data-lg-root="footer">
     <canvas class="field" data-field="footer" aria-hidden="true"></canvas>
-    <div class="footer-bar glass" data-config='{"zRadius":22,"blurAmount":0.3,"brightness":-0.1}'>
-      <div class="footer-brand">
-        <a class="brand" href="#top" aria-label="Causvia, back to top">
-          <img class="brand-mark" src="/causvia-mark-160.webp" width="160" height="117" alt="" decoding="async">
-          <img class="brand-word" src="/causvia-wordmark-280.webp" width="280" height="27" alt="" decoding="async">
-        </a>
-        <p class="footer-tag">Balance, proven.</p>
+    <div class="footer-horizon" aria-hidden="true"></div>
+    <div class="footer-wordmark" aria-hidden="true"><span>CAUSVIA</span></div>
+    <div class="footer-panel glass" data-config='{"zRadius":24,"blurAmount":0.12,"brightness":-0.14}'>
+      <div class="fp-top">
+        <p class="fp-tag">Balance, proven.</p>
+        <div class="fp-slot fp-slot-news" aria-hidden="true"></div>
       </div>
-      <ul class="footer-links">
-        <li><a href="#how">How it works</a></li>
-        <li><a href="https://causvia-website.vercel.app/about">About</a></li>
-        <li><a href="https://causvia-website.vercel.app/privacy.html">Privacy</a></li>
-        <li><a href="https://causvia-website.vercel.app/terms.html">Terms</a></li>
-      </ul>
-      <p class="footer-legal">© 2026 Aurexis AI Private Limited · Made in India</p>
+      <nav class="fp-cols" aria-label="Footer links">
+        <div class="fp-col">
+          <h2 class="fp-h">Product</h2>
+          <ul>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#skeptic">The Skeptic</a></li>
+            <li><a href="#autonomy">Autonomy map</a></li>
+            <li><a href="#trust">Trust</a></li>
+          </ul>
+        </div>
+        <div class="fp-col">
+          <h2 class="fp-h">Company</h2>
+          <ul>
+            <li><a href="https://causvia-website.vercel.app/about">About</a></li>
+            <li><a href="#neutrality">Our neutrality pledge</a></li>
+            <li><a href="https://causvia-website.vercel.app/auth?tab=request">Get a free audit</a></li>
+          </ul>
+        </div>
+        <div class="fp-col">
+          <h2 class="fp-h">Legal</h2>
+          <ul>
+            <li><a href="https://causvia-website.vercel.app/privacy.html">Privacy</a></li>
+            <li><a href="https://causvia-website.vercel.app/terms.html">Terms</a></li>
+          </ul>
+        </div>
+      </nav>
+      <hr class="fp-rule">
+      <div class="fp-bottom">
+        <p class="fp-legal">© 2026 Aurexis AI Private Limited · Made in India</p>
+        <div class="fp-actions">
+          <a class="fp-social" href="https://www.linkedin.com/in/udharth-mangla/" target="_blank" rel="noopener" aria-label="Causvia on LinkedIn (opens in a new tab)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-4.74c0-1.13-.02-2.59-1.58-2.59-1.58 0-1.82 1.23-1.82 2.5V21h-4z"/></svg>
+          </a>
+          <span class="fp-slot fp-slot-top" aria-hidden="true"></span>
+        </div>
+      </div>
     </div>
+    <form class="news glass" novalidate data-config='{"zRadius":22,"blurAmount":0.2,"brightness":-0.14}'>
+      <label class="news-label" for="news-email">Get the monthly evidence note</label>
+      <input class="news-input" id="news-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="Get the monthly evidence note" aria-describedby="news-msg" required>
+      <span class="news-trap" aria-hidden="true"><input name="website" type="text" tabindex="-1" autocomplete="off"></span>
+      <button class="news-btn" type="submit">Subscribe</button>
+      <p class="news-msg" id="news-msg" role="status" aria-live="polite"></p>
+    </form>
+    <button class="to-top glass" type="button" aria-label="Back to top" data-config='{"button":true,"zRadius":22,"blurAmount":0.15,"edgeHighlight":0.2}'>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.5M4 7.5 8 3.5l4 4"/></svg>
+    </button>
   </div>
 </footer>
 

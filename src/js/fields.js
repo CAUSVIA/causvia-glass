@@ -108,6 +108,8 @@ function relRect(el, root) {
         a alpha, ax/ay drift amplitude, p period in seconds, ph phase
    ribbon: soft aurora band made of overlapping ellipses along a slow sine     */
 
+const isAnimated = (preset) => Boolean(preset.orbs?.length || preset.ribbons?.length || preset.animate);
+
 const PRESETS = {
   hero: {
     orbs: [
@@ -439,14 +441,12 @@ const PRESETS = {
   },
 
   footer: {
-    orbs: [
-      { c: TEAL, x: 0.78, y: 0.9, r: 0.3, a: 0.2, ax: 0.04, ay: 0.02, p: 70, ph: 0 },
-      { c: GOLD, x: 0.2, y: 0.95, r: 0.26, a: 0.16, ax: 0.04, ay: 0.02, p: 80, ph: 2 },
-    ],
+    // the gold-to-teal horizon and the CAUSVIA wordmark are sibling DOM layers (index.html)
+    orbs: [],
     fadeBottom: 0,
     static(ctx, w, h) {
-      grid(ctx, w, h, { step: 48, alpha: 0.04 });
-      radialMask(ctx, w, h, 0.5, 0.7, 0.6);
+      grid(ctx, w, h, { step: 56, alpha: 0.045 });
+      radialMask(ctx, w, h, 0.5, 0.85, 0.7);
     },
   },
 };
@@ -681,7 +681,7 @@ export class Fields {
     const live = [];
     for (const g of this.visibleGlass) {
       const f = this.byRoot(g.parentElement);
-      if (f?.inst && f.visible) live.push([g, f.inst]);
+      if (f?.inst && f.visible && isAnimated(f.preset)) live.push([g, f.inst]);
     }
     if (!live.length) return;
     const n = Math.min(this.glassBudget, live.length);
@@ -706,7 +706,7 @@ export class Fields {
       const t = now / 1000;
       let any = false;
       for (const f of this.fields) {
-        if (!f.active || !f.visible) continue;
+        if (!f.active || !f.visible || !isAnimated(f.preset)) continue;
         any = true;
         this.paint(f, t);
       }

@@ -11,6 +11,7 @@ import { initHero } from './js/hero.js';
 import { initLoop } from './js/loop.js';
 import { initReveal } from './js/reveal.js';
 import { initCursorLight } from './js/cursor-light.js';
+import { initFooter } from './js/footer.js';
 
 const html = document.documentElement;
 html.classList.add('js');
@@ -26,6 +27,7 @@ const manager = new GlassManager({ mobile: env.mobile });
 const nav = initNav({ manager, fields });
 const hero = initHero();
 initLoop({ fields });
+initFooter({ manager, reduceMotion: () => env.reduceMotion });
 
 initReveal({
   still: env.reduceMotion,

@@ -8,14 +8,17 @@
 // - every destroyed root also releases its WebGL context, so the browser limit is never approached
 
 // Brief's starting values were refraction 0.7, blurAmount 0.15, chromAberration 0.04,
-// edgeHighlight 0.08, specular 0.25, fresnel 1, shadowOpacity 0.35. Tuned by eye on the
-// dark backdrops: full specular + fresnel read as white plastic rails along the rims.
+// edgeHighlight 0.08, specular 0.25, fresnel 1, shadowOpacity 0.35, then tuned by eye.
+// specular is 0: the library's highlight lights point along +y, which in its DOM-space
+// coordinates is the *bottom* of each panel, so any specular drew a bright line inside the
+// bottom edge and a tick in the bottom-right corner. The top rim comes from edgeHighlight.
+// (The dome lens sets its own specular: on a sphere a highlight anywhere reads correctly.)
 const DEFAULTS = {
   refraction: 0.7,
   blurAmount: 0.15,
   chromAberration: 0.04,
   edgeHighlight: 0.08,
-  specular: 0.14,
+  specular: 0,
   fresnel: 0.6,
   shadowOpacity: 0.35,
 };
