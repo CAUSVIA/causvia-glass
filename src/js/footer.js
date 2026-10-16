@@ -40,7 +40,7 @@ export function initFooter({ manager, reduceMotion }) {
   const wide = matchMedia('(min-width: 768px)');
   const setLabel = () => {
     label.classList.toggle('vh', wide.matches);
-    form.querySelector('.news-input').placeholder = wide.matches ? 'Get the monthly evidence note' : 'you@company.com';
+    form.querySelector('.news-input').placeholder = wide.matches ? 'Get the monthly evidence note' : 'Your email';
   };
   wide.addEventListener('change', setLabel);
   setLabel();
