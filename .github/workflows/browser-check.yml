@@ -10,12 +10,18 @@ on:
         description: Site to check
         default: https://causvia-glass.vercel.app
         required: true
+      browsers:
+        description: Which browsers
+        type: choice
+        options: [all, firefox, safari]
+        default: all
 
 permissions:
   contents: read
 
 jobs:
   firefox:
+    if: inputs.browsers == 'all' || inputs.browsers == 'firefox'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,7 +33,12 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps firefox
-      - run: node playwright-check.mjs "${{ inputs.url }}" firefox
+      # no GPU on the runner: a virtual display plus Mesa's software OpenGL gives Firefox real WebGL
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri libegl-mesa0
+      - run: xvfb-run -a -s "-screen 0 1920x1080x24" node playwright-check.mjs "${{ inputs.url }}" firefox
+        env:
+          HEADED: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -35,6 +46,7 @@ jobs:
           path: tests/browser-check/out
 
   safari:
+    if: inputs.browsers == 'all' || inputs.browsers == 'safari'
     runs-on: macos-15
     defaults:
       run:
@@ -54,6 +66,7 @@ jobs:
           path: tests/browser-check/out
 
   ios-safari:
+    if: inputs.browsers == 'all' || inputs.browsers == 'safari'
     runs-on: macos-15
     defaults:
       run:

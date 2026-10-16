@@ -11,8 +11,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 fs.mkdirSync('out', { recursive: true });
 const report = {};
 
+// HEADED=1: run with a window (under xvfb on Linux) so Firefox can use Mesa's software OpenGL for WebGL
+const headed = process.env.HEADED === '1';
 for (const name of which) {
-  const browser = await engines[name].launch();
+  const browser = await engines[name].launch({
+    headless: !headed,
+    ...(name === 'firefox' ? { firefoxUserPrefs: { 'webgl.force-enabled': true, 'webgl.disabled': false } } : {}),
+  });
   report[`${name}-version`] = browser.version();
   for (const [vp, opts] of [
     ['desktop', { viewport: { width: 1440, height: 900 } }],
