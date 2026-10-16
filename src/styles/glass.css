@@ -1,0 +1,109 @@
+/* ------------------------------------------------------------------
+   Glass roots
+   Each section has one root. The root itself carries no background:
+   the backdrop lives in a <canvas class="field"> child so the WebGL
+   library can see it. Glass elements are direct children of the root.
+------------------------------------------------------------------- */
+.lg-root {
+  position: relative;
+  padding-inline: var(--inline);
+  padding-block: var(--sec-pad);
+}
+.lg-root > .field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.lg-root > :where(:not(.field, .glass, .nav-mirror)) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------------
+   Glass material
+   Before WebGL starts (and whenever it can't run) this CSS version is
+   what you see: backdrop blur + saturate, 1px inner highlight, soft
+   shadow. When a root goes live (.lg-on) it crossfades to the
+   refracting canvas the library injects into each glass element.
+------------------------------------------------------------------- */
+.glass {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  color: var(--text);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  box-shadow:
+    0 30px 70px -32px rgba(2, 6, 16, .8),
+    0 10px 24px -14px rgba(2, 6, 16, .55);
+  transition:
+    opacity var(--dur) var(--ease) var(--d, 0ms),
+    transform var(--dur) var(--ease) var(--d, 0ms),
+    box-shadow var(--dur) var(--ease),
+    -webkit-backdrop-filter var(--dur) var(--ease),
+    backdrop-filter var(--dur) var(--ease);
+}
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025) 42%, rgba(255, 255, 255, .045)),
+    rgba(20, 30, 52, .4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .22),
+    inset 0 0 0 1px rgba(255, 255, 255, .08);
+  transition: opacity var(--dur) var(--ease), background-color .5s var(--ease);
+}
+.glass > canvas {
+  /* the injected canvas is 20px larger than its element on every side (shadow room) */
+  max-width: none;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.lg-on > .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+.lg-on > .glass::before { opacity: 0; }
+.lg-on > .glass > canvas { opacity: 1; }
+
+/* hover for the CSS version (the library handles hover when live) */
+a.glass:hover::before,
+button.glass:hover::before { background-color: rgba(34, 46, 74, .5); }
+
+/* gold edge = human, teal edge = AI. Drawn above the injected canvas. */
+.glass[data-edge]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.glass[data-edge="gold"]::after {
+  box-shadow: inset 0 0 0 1px var(--gold-hair);
+  background: linear-gradient(180deg, rgba(212, 175, 55, .1), rgba(212, 175, 55, 0) 48%);
+}
+.glass[data-edge="teal"]::after {
+  box-shadow: inset 0 0 0 1px var(--teal-hair);
+  background: linear-gradient(180deg, rgba(14, 165, 168, .1), rgba(14, 165, 168, 0) 48%);
+}
+
+/* prefers-reduced-transparency: same shapes, far more opaque */
+.reduce-transparency .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.reduce-transparency .glass::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 50%),
+    #18213A;
+}

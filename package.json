@@ -1,0 +1,19 @@
+{
+  "name": "causvia-glass",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Causvia, liquid glass edition: the R&D lab for the hybrid workforce.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1",
+    "vite": "^8.3.4"
+  },
+  "dependencies": {
+    "@ybouane/liquidglass": "1.0.3"
+  }
+}
